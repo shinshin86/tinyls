@@ -1,5 +1,6 @@
 extern crate libc;
 extern crate structopt;
+extern crate termion;
 
 use chrono::{DateTime, Local};
 use libc::{S_IRGRP, S_IROTH, S_IRUSR, S_IWGRP, S_IWOTH, S_IWUSR, S_IXGRP, S_IXOTH, S_IXUSR};
@@ -9,6 +10,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::process;
 use structopt::StructOpt;
+use termion::color;
 
 #[derive(StructOpt, Debug)]
 struct Opt {
@@ -60,13 +62,23 @@ fn run(dir: &PathBuf) -> Result<(), Box<dyn Error>> {
             let size = metadata.len();
             let modified: DateTime<Local> = DateTime::from(metadata.modified()?);
 
-            println!(
+            if metadata.is_dir() {
+                print!("{}", color::Fg(color::Green));
+            }
+
+            print!(
                 "{} {:>5} {} {}",
                 parmissions,
                 size,
                 modified.format("%_d %b %H:%M").to_string(),
                 file_name
             );
+
+            if metadata.is_dir() {
+                print!("{}", color::Fg(color::Reset));
+            }
+
+            println!("");
         }
     }
 
